@@ -9,6 +9,9 @@ on:
       - '**.md'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: environment-${{ github.ref }}
   cancel-in-progress: true
