@@ -33,6 +33,11 @@ jobs:
     env:
       SHORT_SHA: ${{ needs.job-common.outputs.SHORT_SHA }}
     steps:
+      - name: set environment variables
+        run: |
+          echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "RANDOM_NUMBER=$((1 + RANDOM % 100000))" >> $GITHUB_ENV
+
       - name: checkout repo
         uses: actions/checkout@v4
         with:
@@ -84,5 +89,31 @@ jobs:
       - name: expose apk path
         run: |
           echo "APK_PATH=$(find app/build/outputs/apk -name '*.apk' -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2)" >> $GITHUB_ENV
+
+      - name: create pre-release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: pre-${{ env.SHORT_SHA }}
+          release_name: "${{ env.DATE }}-${{ env.RANDOM_NUMBER }} 更新了"
+          draft: false
+          prerelease: true
+          body: |
+            自动构建版本
+            - 版本: ${{ env.VERSION_NAME }} (${{ env.VERSION_CODE }})
+            - 分支: ${{ github.ref_name }}
+            - 提交: ${{ env.SHORT_SHA }}
+
+      - name: upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.APK_PATH }}
+          asset_name: app-${{ env.VERSION_NAME }}-${{ env.VERSION_CODE }}.apk
+          asset_content_type: application/vnd.android.package-archive
 
 
