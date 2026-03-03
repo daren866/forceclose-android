@@ -53,25 +53,18 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: cache gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: gradle-${{ runner.os }}-${{ hashFiles('/*.gradle*', '/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
-      - name: cache gradle wrapper
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/wrapper
-          key: gradle-wrapper-${{ runner.os }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-
       - name: make gradlew executable
         run: chmod +x ./gradlew
 
       - name: clean project
         run: ./gradlew clean
+
+      - name: clear all caches
+        run: |
+          rm -rf ~/.gradle/caches
+          rm -rf ~/.gradle/wrapper
+          rm -rf app/build
+          rm -rf build
 
       - name: assemble debug artifact
         run: ./gradlew assembleDebug
