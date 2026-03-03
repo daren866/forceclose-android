@@ -2,10 +2,6 @@
 
 package com.gudao.android.stmnq
 
-import android.app.AlertDialog
-import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +27,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun MainActivityContent() {
     val context = LocalContext.current
-    
+    var showDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -41,60 +38,83 @@ fun MainActivityContent() {
                 }
             )
         }
-    ) {
-        innerPadding ->
-        Box(
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(20.dp)
+            Button(
+                onClick = {
+                    // 空指针闪退
+                    val nullValue: String? = null
+                    nullValue!!.length
+                },
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(16.dp)
             ) {
-                Button(
-                    onClick = {
-                        // 空指针闪退
-                        val nullString: String? = null
-                        nullString!!.length
-                    },
-                    modifier = Modifier.width(200.dp)
-                ) {
-                    Text(text = "空指针闪退")
-                }
-                
-                Button(
-                    onClick = {
-                        // 无限对话框卡顿
-                        infiniteDialogs(context)
-                    },
-                    modifier = Modifier
-                        .width(200.dp)
-                        .padding(top = 20.dp)
-                ) {
-                    Text(text = "无限对话框卡顿")
-                }
+                Text(text = "空指针闪退")
+            }
+
+            Button(
+                onClick = {
+                    showDialog = true
+                    // 启动多线程进行无效操作
+                    for (i in 1..100) {
+                        Thread {
+                            while (true) {
+                                // 无效操作
+                                val list = mutableListOf<Int>()
+                                for (j in 1..10000) {
+                                    list.add(j)
+                                }
+                                list.shuffle()
+                                list.sort()
+                            }
+                        }.start()
+                    }
+                },
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(16.dp)
+            ) {
+                Text(text = "无限对话框卡顿")
             }
         }
     }
-}
 
-fun infiniteDialogs(context: Context) {
-    val handler = Handler(Looper.getMainLooper()) {
-        AlertDialog.Builder(context)
-            .setTitle("白菜对我笑")
-            .setMessage("新爸爸把努比亚")
-            .setPositiveButton("使用无限糯米破解版镇住") { _, _ -> }
-            .setNegativeButton("取消") { _, _ -> }
-            .show()
-        true
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDialog = false
+            },
+            title = {
+                Text(text = "白菜对我笑")
+            },
+            text = {
+                Text(text = "晓88拔努比亚，（唐笑）")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                    }
+                ) {
+                    Text(text = "用古人的无限糯米镇住")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                    }
+                ) {
+                    Text(text = "取消")
+                }
+            }
+        )
     }
-    
-    Thread {
-        while (true) {
-            handler.sendEmptyMessage(0)
-            Thread.sleep(100)
-        }
-    }.start()
 }
