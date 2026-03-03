@@ -2,6 +2,8 @@
 
 package com.gudao.android.stmnq
 
+import android.app.AlertDialog
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.layout.Box
@@ -28,9 +30,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun MainActivityContent() {
-    var showDialog by remember {
-        mutableStateOf(false)
-    }
+    val context = LocalContext.current
     
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -41,7 +41,8 @@ fun MainActivityContent() {
                 }
             )
         }
-    ) { innerPadding ->
+    ) {
+        innerPadding ->
         Box(
             modifier = Modifier
                 .padding(innerPadding)
@@ -66,8 +67,7 @@ fun MainActivityContent() {
                 Button(
                     onClick = {
                         // 无限对话框卡顿
-                        showDialog = true
-                        infiniteDialogs { showDialog = true }
+                        infiniteDialogs(context)
                     },
                     modifier = Modifier
                         .width(200.dp)
@@ -78,47 +78,22 @@ fun MainActivityContent() {
             }
         }
     }
-    
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showDialog = false
-            },
-            title = {
-                Text(text = "白菜对我笑")
-            },
-            text = {
-                Text(text = "新爸爸把努比亚")
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDialog = false
-                    }
-                ) {
-                    Text(text = "使用无限糯米破解版镇住")
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        showDialog = false
-                    }
-                ) {
-                    Text(text = "取消")
-                }
-            }
-        )
-    }
 }
 
-fun infiniteDialogs(onShowDialog: () -> Unit) {
+fun infiniteDialogs(context: Context) {
+    val handler = Handler(Looper.getMainLooper()) {
+        AlertDialog.Builder(context)
+            .setTitle("白菜对我笑")
+            .setMessage("新爸爸把努比亚")
+            .setPositiveButton("使用无限糯米破解版镇住") { _, _ -> }
+            .setNegativeButton("取消") { _, _ -> }
+            .show()
+        true
+    }
+    
     Thread {
-        val handler = Handler(Looper.getMainLooper())
         while (true) {
-            handler.post {
-                onShowDialog()
-            }
+            handler.sendEmptyMessage(0)
             Thread.sleep(100)
         }
     }.start()
