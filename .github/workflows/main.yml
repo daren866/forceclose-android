@@ -92,7 +92,7 @@ jobs:
 
       - name: expose apk path
         run: |
-          echo "APK_PATH=$(find app/build/outputs/apk -name '*.apk' -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2)" >> $GITHUB_ENV
+          echo "APK_PATH=$(find app/build/outputs/apk/release -name '*.apk' -type f | head -1)" >> $GITHUB_ENV
 
       - name: create pre-release
         id: create_release
