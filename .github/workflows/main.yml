@@ -66,11 +66,11 @@ jobs:
           path: ~/.gradle/wrapper
           key: gradle-wrapper-${{ runner.os }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
 
-      - name: clean outputs directory
-        run: rm -rf app/build/outputs/*
-
       - name: make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: clean project
+        run: ./gradlew clean
 
       - name: assemble debug artifact
         run: ./gradlew assembleDebug
