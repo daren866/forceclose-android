@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.gudao.android.stmnq.ui.AppTheme
+import com.gudao.android.stmnq.MainActivityContent
 
 class MainActivity: ComponentActivity() {
 
