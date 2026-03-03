@@ -40,6 +40,7 @@ jobs:
         run: |
           echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
           echo "RANDOM_NUMBER=$((1 + RANDOM % 100000))" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: checkout repo
         uses: actions/checkout@v4
@@ -99,7 +100,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: pre-${{ env.SHORT_SHA }}
+          tag_name: pre-${{ env.SHORT_SHA }}-${{ env.TIMESTAMP }}
           release_name: "${{ env.DATE }}-${{ env.RANDOM_NUMBER }} 更新了"
           draft: false
           prerelease: true
