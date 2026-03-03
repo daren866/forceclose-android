@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +30,9 @@ import androidx.compose.ui.unit.dp
 fun MainActivityContent() {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
+    var showMemoryLeakDialog by remember { mutableStateOf(false) }
+    var memoryLeakInput by remember { mutableStateOf("") }
+    val leakList = remember { mutableListOf<ByteArray>() }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -84,6 +88,17 @@ fun MainActivityContent() {
             ) {
                 Text(text = "无限对话框卡顿")
             }
+
+            Button(
+                onClick = {
+                    showMemoryLeakDialog = true
+                },
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(16.dp)
+            ) {
+                Text(text = "内存泄露测试")
+            }
         }
     }
 
@@ -111,6 +126,62 @@ fun MainActivityContent() {
                 Button(
                     onClick = {
                         showDialog = false
+                    }
+                ) {
+                    Text(text = "取消")
+                }
+            }
+        )
+    }
+
+    if (showMemoryLeakDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showMemoryLeakDialog = false
+                memoryLeakInput = ""
+            },
+            title = {
+                Text(text = "输入")
+            },
+            text = {
+                Column {
+                    Text(text = "内存每秒泄露多少mb？")
+                    TextField(
+                        value = memoryLeakInput,
+                        onValueChange = { memoryLeakInput = it },
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showMemoryLeakDialog = false
+                        val leakRate = memoryLeakInput.toIntOrNull() ?: 1
+                        // 开始内存泄露
+                        Thread {
+                            while (true) {
+                                try {
+                                    // 泄露指定大小的内存
+                                    val byteArray = ByteArray(leakRate * 1024 * 1024) // 1MB = 1024*1024 bytes
+                                    leakList.add(byteArray)
+                                    Thread.sleep(1000) // 每秒泄露一次
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }.start()
+                        memoryLeakInput = ""
+                    }
+                ) {
+                    Text(text = "确定")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showMemoryLeakDialog = false
+                        memoryLeakInput = ""
                     }
                 ) {
                     Text(text = "取消")
